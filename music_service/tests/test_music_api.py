@@ -1,48 +1,49 @@
-import pytest
 import json
+
+import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
 
-from app.ingest_files_api import app
+from app.music_api import app
 
 
 @pytest.mark.asyncio
-async def test_get_all_movies():
+async def test_get_all_musics():
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.get("/v1/movies/get_all_movies/")
+            response = await client.get("/v1/musics/get_all_musics/")
 
         assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_get_one_movie():
+async def test_get_one_music():
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.get("/v1/movies/get_one_movie/1/")
+            response = await client.get("/v1/musics/get_one_music/1/")
 
         assert response.status_code == 200
 
 @pytest.mark.asyncio
-async def test_get_one_movie_error():
+async def test_get_one_music_error():
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.get("/v1/movies/get_one_movie/0/")
+            response = await client.get("/v1/musics/get_one_music/0/")
 
         assert response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_create_movie():
-    new_movie =  {"title": "Star Wars: Episode IV - A New Hope",
-                "genres": "Action|Adventure|Fantasy"
+async def test_create_music():
+    new_music =  {"title": "Teste",
+                  "author": "teste"
     }
-    json_object = json.dumps(new_movie)
+    json_object = json.dumps(new_music)
 
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = client.post("/v1/movies/create_movie/", json = json_object)
+            response = client.post("/v1/musics/create_music/", json = json_object)
 
     print(response)
 
@@ -50,29 +51,29 @@ async def test_create_movie():
 
 
 @pytest.mark.asyncio
-async def test_update_movie():
-    update_movie =  {"title": "Star Wars: Episode IV - A New Hope",
-                "genres": "Action|Adventure|Fantasy"
+async def test_update_music():
+    update_music =  {"title": "Teste",
+                     "author": "teste"
     }
 
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = client.put("/v1/movies/update_movie/1/", json = update_movie)
+            response = client.put("/v1/musics/update_music/1/", json = update_music)
 
     assert response.status_code == 200
 
 @pytest.mark.asyncio
-async def test_delete_movie():
+async def test_delete_music():
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = client.delete("/v1/movies/delete_movie/1/")
+            response = client.delete("/v1/musics/delete_music/1/")
 
     assert response.status_code == 200
 
 @pytest.mark.asyncio
-async def test_delete_movie_error():
+async def test_delete_music_error():
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
-            response = client.delete("/v1/movies/delete_movie/0/")
+            response = client.delete("/v1/musics/delete_music/0/")
 
     assert response.status_code == 404

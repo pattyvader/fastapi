@@ -1,16 +1,20 @@
+import os
+
 from datetime import date
 from typing import List
 from databases import Database
-import sqlalchemy
+import sqlalchemy 
 from sqlalchemy.dialects.postgresql import ARRAY
 from fastapi import FastAPI, status, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from typing import Optional
-from pydantic import BaseModel
+
+from schema import Music
 
 
-DATABASE_URL = "postgresql://admin:admin@postgres/music_db"
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 database = Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
 
@@ -24,18 +28,14 @@ musics = sqlalchemy.Table(
     sqlalchemy.Column("keywords", ARRAY(sqlalchemy.String)),
 )
 
-class MyBaseModel(BaseModel):
-    class Config:
-        orm_mode = True
-
-class Music(MyBaseModel):
-    title: str
-    author: list
-    release_data: date
-    keywords: list
-
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 @app.on_event("startup")
 async def startup():
@@ -49,7 +49,6 @@ async def shutdown():
 
 @app.get(
     "/v1/musics/get_all_musics/",
-    response_model=List[Music],
     status_code=status.HTTP_200_OK,
 )
 async def get_all_musics():
@@ -62,7 +61,7 @@ async def get_all_musics():
             detail=f"No music",
         )
 
-    return {"Status": "Success", "Musics": musics_list}
+    return musics_list
 
 
 @app.get(
@@ -145,26 +144,11 @@ async def delete_music(music_id: int):
     status_code=status.HTTP_200_OK
 )
 async def search_music(keyword: Optional[str] = None) -> dict:
-    query = filter(musics.c.title.like(keyword) | musics.c.keywords.like(f'%{keyword}%'))
+    query = musics.select().where(sqlalchemy.or_(
+        musics.c.keywords.any(keyword),
+        musics.c.title.like(f'%{keyword}%'),
+        musics.c.author.any(keyword),
+    ))
     musics_list = await database.fetch_all(query)
-    musics.query.filter
 
     return {"results": list(musics_list)}
-
-'''@app.get(
-    "/v1/musics/search/",
-    status_code=status.HTTP_200_OK
-)
-def search(
-    keyword: Optional[str] = None, max_results: Optional[int] = 10 
-) -> dict:
-    """
-    Search for recipes based on label keyword
-    """
-    if not keyword:
-        # we use Python list slicing to limit results
-        # based on the max_results query parameter
-        return {"results": musics[:max_results]}  # 6
-
-    results = filter(lambda recipe: keyword.lower() in recipe["label"].lower(), List[Music])  # 7
-    return {"results": list(results)}'''
