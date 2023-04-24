@@ -18,14 +18,10 @@ services:
            - POSTGRES_PASSWORD=admin
            - POSTGRES_DB=music_db
     music_service:
-        build: ./backend/music_service
+        build: music_service
         ports:
             - "5000:5000"
         depends_on:
             - flyway
-    music_frontend:
-        build: ./frontend/music_frontend
-        ports:
-            - "8080:80"
-        depends_on:
-            - music_service
+        env_file:
+            - .env

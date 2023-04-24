@@ -21,10 +21,7 @@ jobs:
           services: |
             flyway
             postgres
-            minio
-            minio_bucket
-            prediction_service
-            ingestion_service
+            music_service
       - name: Build the Docker image
         run: docker-compose -f "docker-compose.yml" up -d --build
       - name: Lint with flake8
