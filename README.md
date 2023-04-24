@@ -15,7 +15,7 @@
 
 ## Comandos:
 
-1. No diretório **/fastapi_crud** reside o arquivo *docker-compose.yml*.
+1. No diretório **/fastapi** reside o arquivo *docker-compose.yml*.
 2. Executar o comando **docker compose up** para criar toda a infraestrutura.
 3. Executar o comando **docker compose down --remove-orphans** para destruir toda a infraestrutura.
 4. Executar o comando **docker compose up -- build** para recriar toda a estrutura.
