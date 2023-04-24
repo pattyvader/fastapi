@@ -8,7 +8,6 @@ RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
 COPY ./v1/app /v1/app
-COPY .env .env
 
 EXPOSE 5000
 
